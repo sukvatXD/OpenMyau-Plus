@@ -1,8 +1,8 @@
-name: Build Mod 1.8.9 with Logs
+name: Build Mod
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master" ] # Đổi lại theo tên branch của bạn
   pull_request:
     branches: [ "main", "master" ]
 
@@ -11,30 +11,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up JDK 8
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'temurin'
+        cache: gradle
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-    - name: Build with Logs
+    - name: Build with Gradle
       run: |
-        chmod +x gradlew
-        # Chạy build và xuất log ra file build_log.txt
-        # --info giúp log chi tiết hơn so với mặc định
-        ./gradlew build --no-daemon --info > build_log.txt 2>&1 || (echo "Build failed, checking logs..." && exit 1)
+        # Chạy build với Java 17 nhưng ép target về Java 8 thông qua Toolchain
+        ./gradlew build --no-daemon --info --stacktrace \
+          -Porg.gradle.java.installations.auto-download=true \
+          -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=512m"
 
-    - name: Upload Artifacts (Mod & Logs)
-      if: always() # Luôn chạy kể cả khi build thất bại để lấy log
+    - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Build-Output
-        path: |
-          build/libs/*.jar
-          build_log.txt
+        name: Mod-Jar-File
+        path: build/libs/*.jar
