@@ -1,0 +1,9 @@
+- name: Build with Gradle
+      run: |
+        chmod +x gradlew
+        # Thêm các tham số tối ưu cho môi trường CI
+        ./gradlew build --no-daemon --info --stacktrace \
+          -Dorg.gradle.internal.http.socketTimeout=600000 \
+          -Dorg.gradle.internal.http.connectionTimeout=600000 \
+          -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=512m" \
+          > build_log.txt 2>&1 || (tail -n 100 build_log.txt && exit 1)
