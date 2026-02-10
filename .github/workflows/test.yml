@@ -28,7 +28,7 @@ jobs:
         chmod +x gradlew
         # Chạy build và xuất log ra file build_log.txt
         # --info giúp log chi tiết hơn so với mặc định
-        ./gradlew build --info > build_log.txt 2>&1 || (echo "Build failed, checking logs..." && exit 1)
+        ./gradlew build --no-daemon --info > build_log.txt 2>&1 || (echo "Build failed, checking logs..." && exit 1)
 
     - name: Upload Artifacts (Mod & Logs)
       if: always() # Luôn chạy kể cả khi build thất bại để lấy log
