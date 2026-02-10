@@ -1,0 +1,40 @@
+name: Build Mod 1.8.9 with Logs
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+
+    - name: Build with Logs
+      run: |
+        chmod +x gradlew
+        # Chạy build và xuất log ra file build_log.txt
+        # --info giúp log chi tiết hơn so với mặc định
+        ./gradlew build --info > build_log.txt 2>&1 || (echo "Build failed, checking logs..." && exit 1)
+
+    - name: Upload Artifacts (Mod & Logs)
+      if: always() # Luôn chạy kể cả khi build thất bại để lấy log
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-Output
+        path: |
+          build/libs/*.jar
+          build_log.txt
